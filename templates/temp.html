@@ -1,0 +1,426 @@
+/* static/css/style.css */
+
+/* --- Global & Layout --- */
+body {
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+  background-color: #f4f6f9; /* Softer, modern gray background */
+  color: #343a40;
+}
+
+/* New 'Card' container for grouped elements */
+.ui-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Soft, elevated shadow */
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(0,0,0,0.03); /* Very subtle border */
+}
+
+/* Header styling */
+.main-header {
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-top: -1rem; /* Pull to top */
+    padding-top: 1rem;
+    margin-bottom: 2rem !important;
+}
+
+/* --- Table & Sticky Header Fix --- */
+.table-responsive {
+    max-height: 70vh;
+    overflow-y: auto;
+    border-radius: 8px; /* Round corners of the table viewer */
+}
+
+.table {
+  margin-bottom: 0; /* Remove bottom margin inside the wrapper */
+  animation: pageFade 0.5s ease-out both; /* Smoother entry */
+}
+
+.table > thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    /* THE FIX: Box shadow creates a persistent line under the sticky header */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.table > thead > tr > th {
+    background-color: #f8f9fa; /* Keep bg opaque */
+    border-bottom: 2px solid #dde2e6; /* Stronger separator line */
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    color: #495057;
+}
+
+.table-hover tbody tr {
+    transition: background-color 0.2s ease;
+}
+.table-hover tbody tr:hover {
+    background-color: #f1f5f9 !important; /* distinct hover color */
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* --- Inputs & Controls --- */
+.form-control, .form-select {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    transition: all 0.2s ease-in-out;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15); /* Softer focus glow */
+    transform: translateY(-1px);
+}
+
+/* --- Button Animations --- */
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); /* Snappy transition */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Subtle base shadow */
+}
+
+.btn:hover {
+    transform: translateY(-2px); /* Lift effect */
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1); /* Deeper shadow on hover */
+}
+
+.btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Specific button tweaks */
+.btn-primary, .btn-success {
+    box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.btn.action-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+
+/* --- Advanced Columns (Keep existing logic) --- */
+.advanced-column {
+  max-width: 0;
+  padding-left: 0;
+  padding-right: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: max-width 0.5s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease, opacity 0.3s ease;
+  box-sizing: border-box;
+  opacity: 0;
+}
+.advanced-column.advanced-visible {
+  max-width: 300px;
+  padding-left: 8px;
+  padding-right: 8px;
+  overflow: visible;
+  white-space: normal;
+  opacity: 1;
+}
+.advanced-column.url-column.advanced-visible {
+  max-width: 400px;
+}
+.section-filtered-column {
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  opacity: 0 !important;
+  transition: all 0.3s ease;
+}
+
+/* --- Animations --- */
+@keyframes pageFade {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes flashGreen {
+  0%   { background-color: rgba(40, 167, 69, 0.3); }
+  100% { background-color: transparent; }
+}
+@keyframes flashRed {
+  0%   { background-color: rgba(220, 53, 69, 0.3); }
+  100% { background-color: transparent; }
+}
+.row-update-success { animation: flashGreen 1s ease-out forwards; }
+.row-update-decrease { animation: flashRed 1s ease-out forwards; }
+
+/* Add form pulse on submit */
+.add-form.submitting {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+// --- GLOBAL CONSTANTS ---
+const headers = Array.from(document.querySelectorAll('#inv-table thead th')).map(t => t.innerText.trim());
+const unitsColIndex = headers.findIndex(h => h.toLowerCase().includes('existing units'));
+const remarksColIndex = headers.findIndex(h => h.toLowerCase().includes('remarks'));
+const sectionColIndex = headers.findIndex(h => h.toLowerCase().includes('section'));
+const itemNoColIndex = headers.findIndex(h => h.toLowerCase().includes('item no'));
+const advancedHeaders = ['Part number', 'SKU ID', 'Remarks', 'URLS'];
+
+// --- GLOBAL VARIABLES ---
+let advancedVisible = false;
+let selectedItemNo = null; // For the retrieval modal
+
+// --- ======================================================= ---
+// ---                 FUNCTION DEFINITIONS                    ---
+// --- ======================================================= ---
+
+// --- ADMIN-ONLY FUNCTIONS (for index.html) ---
+function adjust(e, itemNo, delta) {
+  e.preventDefault();
+  const tr = document.querySelector(`tr[data-item-no="${itemNo}"]`);
+  if (!tr) return;
+  const unitsCell = tr.cells[unitsColIndex];
+  if (!unitsCell) return;
+  let cur = parseFloat(unitsCell.innerText) || 0;
+  let next = cur + delta;
+  if (next < 0) next = 0;
+
+  fetch('/update', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({item_no: itemNo, col_name: headers[unitsColIndex], new_value: next})
+  }).then(r => r.json()).then(j => {
+    if (j.ok) {
+      unitsCell.innerText = next;
+      if (remarksColIndex > -1 && tr.cells[remarksColIndex]) {
+        tr.cells[remarksColIndex].innerText = next <= 0 ? 'Out of Stock' : (next <= 5 ? 'Low Stock' : 'In Stock');
+      }
+      tr.classList.remove('row-update-success', 'row-update-decrease');
+      tr.classList.add(delta > 0 ? 'row-update-success' : 'row-update-decrease');
+      setTimeout(() => tr.classList.remove('row-update-success','row-update-decrease'), 1000);
+    } else {
+      alert('Update failed: ' + (j.error || JSON.stringify(j)));
+    }
+  }).catch(err => alert('Error: ' + err));
+}
+
+function deleteItem(e, itemNo) {
+  e.preventDefault();
+  if (!confirm('Are you sure you want to delete this item? This action cannot be undone.')) return;
+  fetch('/delete', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({item_no: itemNo})
+  }).then(r => r.json()).then(j => {
+    if (j.ok) {
+      const tr = document.querySelector(`tr[data-item-no="${itemNo}"]`);
+      if (tr) {
+        tr.classList.add('row-update-decrease');
+        setTimeout(() => location.reload(), 500);
+      } else {
+        location.reload();
+      }
+    } else {
+      alert('Deletion failed: ' + (j.error || JSON.stringify(j)));
+    }
+  }).catch(err => alert('Error: ' + err));
+}
+
+function addItem(e) {
+  e.preventDefault();
+  const form = document.getElementById('addForm');
+  const container = form.closest('.add-form');
+  if(container) container.classList.add('submitting');
+  fetch('/add', { method:'POST', body: new FormData(form) }).then(() => {
+    location.reload();
+  });
+  return false;
+}
+
+// --- SHARED FUNCTIONS (used on multiple pages) ---
+function resetSearch() {
+  const searchInput = document.getElementById('search');
+  if(searchInput) {
+    searchInput.value = '';
+    searchInput.dispatchEvent(new Event('input'));
+  }
+}
+
+function filterBySection(selectedSection) {
+  document.getElementById('search').dispatchEvent(new Event('input'));
+  const allHeaderCells = document.querySelectorAll('#table-headers th');
+  const allDataCells = document.querySelectorAll('#table-body td');
+  if (itemNoColIndex > -1 && sectionColIndex > -1) {
+    const colsToHide = [headers[itemNoColIndex], headers[sectionColIndex]];
+    const shouldHide = !!selectedSection;
+    allHeaderCells.forEach((th, i) => { if (colsToHide.includes(headers[i])) th.classList.toggle('section-filtered-column', shouldHide); });
+    allDataCells.forEach(td => { if (colsToHide.includes(td.dataset.colName)) td.classList.toggle('section-filtered-column', shouldHide); });
+  }
+}
+
+function initializeAdvancedColumns() {
+  const savedState = localStorage.getItem('advancedColumnsVisible');
+  advancedVisible = savedState === 'true';
+  applyAdvancedColumnsState();
+  const btn = document.getElementById('advancedToggleBtn');
+  if (btn) {
+      btn.innerText = advancedVisible ? 'Hide Advanced' : 'Show Advanced';
+      btn.classList.toggle('advanced-open', advancedVisible);
+  }
+}
+
+function toggleAdvancedColumns() {
+  advancedVisible = !advancedVisible;
+  localStorage.setItem('advancedColumnsVisible', advancedVisible);
+  applyAdvancedColumnsState();
+  const btn = document.getElementById('advancedToggleBtn');
+  if (btn) {
+      btn.innerText = advancedVisible ? 'Hide Advanced' : 'Show Advanced';
+      btn.classList.toggle('advanced-open', advancedVisible);
+  }
+}
+
+function applyAdvancedColumnsState() {
+  document.querySelectorAll('.advanced-column').forEach(col => col.classList.toggle('advanced-visible', advancedVisible));
+  document.querySelectorAll('.advanced-add-field').forEach(field => field.style.display = advancedVisible ? 'block' : 'none');
+}
+
+// --- RETRIEVAL PAGE SPECIFIC FUNCTIONS (YOUR WORKING LOGIC) ---
+function openRetrieveModal(itemNo) {
+  selectedItemNo = itemNo;
+  const tr = document.querySelector(`tr[data-item-no="${itemNo}"]`);
+  if (!tr) return;
+
+  // Find data by known column positions on the retrieve page
+  const componentName = tr.cells[2].innerText;
+  const currentStock = parseInt(tr.cells[5].innerText);
+
+  const modalInfo = document.getElementById('modalItemInfo');
+  if (modalInfo) {
+      modalInfo.innerHTML = `
+        <strong>Item:</strong> ${componentName}<br>
+        <strong>Available Stock:</strong> <span class="fw-bold fs-5 text-success">${currentStock}</span>
+      `;
+  }
+  
+  const quantityInput = document.getElementById("retrieveQuantity");
+  quantityInput.max = currentStock;
+  quantityInput.value = 1;
+
+  const modal = new bootstrap.Modal(document.getElementById("retrieveModal"));
+  modal.show();
+}
+
+function changeQuantity(delta) {
+  const input = document.getElementById("retrieveQuantity");
+  if (!input) return;
+  let value = parseInt(input.value) || 0;
+  let max = parseInt(input.max) || Infinity;
+  let newValue = Math.max(1, value + delta);
+  if (newValue > max) {
+      newValue = max;
+  }
+  input.value = newValue;
+}
+
+function confirmRetrieve() {
+  const quantityInput = document.getElementById("retrieveQuantity");
+  if (!selectedItemNo || !quantityInput) return;
+
+  const quantity = parseInt(quantityInput.value);
+  if (isNaN(quantity) || quantity <= 0) {
+    alert("Please enter a valid quantity.");
+    return;
+  }
+  if (quantity > parseInt(quantityInput.max)) {
+      alert("Cannot retrieve more than the available stock.");
+      return;
+  }
+
+  const confirmButton = document.querySelector('#retrieveModal .btn-success');
+  confirmButton.disabled = true;
+  confirmButton.innerText = 'Processing...';
+
+  fetch(`/retrieve/${selectedItemNo}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ quantity: quantity }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        alert("Item retrieved successfully!");
+        location.reload();
+      } else {
+        alert(data.error || "Error retrieving item.");
+        confirmButton.disabled = false;
+        confirmButton.innerText = 'Confirm';
+      }
+    })
+    .catch((err) => {
+      console.error("Retrieve error:", err);
+      alert("An error occurred while retrieving the item.");
+      confirmButton.disabled = false;
+      confirmButton.innerText = 'Confirm';
+    });
+}
+
+
+// --- ======================================================= ---
+// ---       MAIN INITIALIZATION LOGIC (RUNS ON PAGE LOAD)     ---
+// --- ======================================================= ---
+document.addEventListener('DOMContentLoaded', function() {
+    // --- SEARCH LISTENER (SHARED) ---
+    const searchInput = document.getElementById('search');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const q = this.value.trim().toLowerCase();
+            const rows = document.querySelectorAll('#table-body tr');
+
+            rows.forEach(r => {
+                const text = r.innerText.toLowerCase();
+                if (text.includes(q)) {
+                    r.style.display = '';
+                    setTimeout(() => r.style.opacity = 1, 10);
+                } else {
+                    r.style.opacity = 0;
+                    setTimeout(()=> { r.style.display = 'none'; }, 300);
+                }
+            });
+        });
+    }
+
+    // --- LOGIC FOR ADMIN PAGE (index.html) ---
+    const addSectionDropdown = document.getElementById('addSection');
+    if (addSectionDropdown) {
+        const addNewSectionOption = document.createElement('option');
+        addNewSectionOption.value = '___NEW_SECTION___';
+        addNewSectionOption.innerText = 'Add New Section...';
+        addSectionDropdown.appendChild(addNewSectionOption);
+
+        addSectionDropdown.addEventListener('change', function() {
+            if (this.value === '___NEW_SECTION___') {
+                const newSectionName = prompt('Enter new section name:');
+                if (newSectionName && newSectionName.trim() !== '') {
+                    const sanitized = newSectionName.trim();
+                    const filterDropdown = document.getElementById('sectionFilter');
+                    if (filterDropdown) filterDropdown.appendChild(new Option(sanitized, sanitized));
+                    addSectionDropdown.insertBefore(new Option(sanitized, sanitized), addNewSectionOption);
+                    addSectionDropdown.value = sanitized;
+                } else {
+                    this.value = '';
+                }
+            }
+        });
+        initializeAdvancedColumns();
+    }
+});
+
+implement the changes from last prompt, into here
