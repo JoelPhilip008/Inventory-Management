@@ -14,12 +14,24 @@ app.secret_key = 's3cR3tK3Y'
 # --- User and Admin Definitions ---
 # Replace this with the dictionary you generated from hash_passwords.py
 USERS = {
-    'admin': 'scrypt:32768:8:1$es3aR6usGR8IVPxG$af6e21ef2b4b025c6ae332023ab4b984db8d2d7b89f9b4a1f5be90d7b0a95174bec5633d69dd73cace5210c528737dc16b40cb918bb86887cc77760ce815ea33',
-    'joellah': 'scrypt:32768:8:1$LO9Txxu7J0MHpeRF$e09c096deebc815495da983a671c6d993ab9a8a65969744c3cecb3c10a2ebdbaf00fb112bbf6d2e949329e54b1d563185e05d666ae46819ac2791c762cdd3ec7',
-    'user1': 'scrypt:32768:8:1$HmxyQ8TV8uITltnM$74994692c00c7cac6e71f91e0f2f155f4041734cf87f0604c6d46eb4a261f1b6930acd34ca71311553ec0b4745bfe4eef9691eb134a3b7f7799f6b87d51279df',
+    'admin': 'scrypt:32768:8:1$kGuZ08OqCJIgKr47$50e763c6250dd62d6d3529340844b6e3d1548b42b3b5324d6be64c7f5cb9df4ea834736076b61ad6d308e08cd4b727f9d9f04b5aefd3f325eeaff2864e106e3a',
+    'chindu': 'scrypt:32768:8:1$6YhnuSBnOfW06VVG$5c7f9b4ef9bebd921ddaafc76018785bebb8c2043bc89c99c2c92911c228be7d756b4ff410b5036cda19c2fe7baa05ad87680e1ad851e25d0e9e4aae1d3ced5a',
+    'joel': 'scrypt:32768:8:1$kvkXBSUvTQkIdGEf$d6c4a57bb38708711d603732007d9387723ae2d80c58c6ac0b8586fd59c44a2d85d9d9524a74359d500e3b471a5ff4e79bbfeffced042c9acf319da7d1f6f82f',
+    'justin': 'scrypt:32768:8:1$hrPdnSYR22tkY6Ys$c0bdfbdb8fe8c5639a3e2c89f538dceefc896c24ae3631e65df83b3e5c9b27770577c763ae95056c5a164c2061db3835eb9db4ed5751a7c5826644f73646c302',
+    'arjun': 'scrypt:32768:8:1$8cjoI1O89RhGLeLJ$984518f3817fa90d7d6b3e0d1b88e65c83e1e0bf8a3b760c49a6933bbd420ae925b16771dafed6e325c926e0ea147973dbeccd9096f8a87d9a5a796138dd34d6',
+    'dayal': 'scrypt:32768:8:1$KsXuzxaino4eqOsQ$caafd67796c4d5566df9aacea97fca30f2759196d32f7001f4371e6aaee1b81829e08d504bc8f04c2425fb64c12c874006427208cc10c0f9e400c3c4e7827bf2',
+    'vivek': 'scrypt:32768:8:1$lieQZDppBs6PCNag$83df3464f75f8621c00cd167b916a47a9e98f6db0a0b44330a1d173702df6b3ce2776ed0fc6c136a4c8223c9b5a7894ca815ecdacf4c00a3a23c373c0b393142',
+    'adarsh': 'scrypt:32768:8:1$MkiIdv2Sr0rY3EYn$d54d994c5ab8321b6cac42fc4323dd26d57dc178e02d2816889f6b1b670fd8756a9c16ab7654fe8b0a6f3c3e082f155d782593bc991697930b1b86a8492304bf',
+    'jedin': 'scrypt:32768:8:1$lSGpcw2n6g4ygUME$6298b71312e0fa772526e424e6dc4d210e51eb1283b16833b95dd83b01681629a3e1b9cf5f25c90130ab18dc1c5ad7a29f787b069c679e953e8360cfe9b92320',
+    'abel': 'scrypt:32768:8:1$AHOEvwseEaQBvqPY$f51846420e64d6b703069c13e589d63f2262c2864797a209b19396771ae44edcef44d19c9c3dee1baf1e5323a762ed344881714266d2bfd87ec8ca75dfa4688c',
+    'fahad': 'scrypt:32768:8:1$uzYQr8e4FYY4a3JF$885bf54cfaf516aabb0c63b9a5417a1366010032a3b20268395b5649a95e35b94fdd564341e12b0295e34451c82c6bf4260c5c30054ab89537c9ccd2c26a1abb',
+    'athul': 'scrypt:32768:8:1$ZWqpWLl51SipkD7Q$47abf34c471482fec32ba6327d649405a5f7feef619a9a2a270bfaf66a70532fedd3ed3ea7c0b4ef464392f8b15f3d8ee258ed489204b9225ab8f60ce08effac',
+    'akhil': 'scrypt:32768:8:1$c97iVwQdFbtghSyy$1d078b25b0f8f9b835ba7a27c1b956c4f54448a1287efd550e9098491a826a3f3ca5726539323ed8e92de52bcc20c4607171c5e3d6cce755ac9b5e9b6d20438d',
+    'vishnu': 'scrypt:32768:8:1$S0H2PVad8W0EHKbA$7dffb779b3b88a53fc5d735ec36da1b3c5e4df6da7c3c1f22bdbbd443804421a9121506aa5bc62371989724354d18b18803609ff77e36f01ef093ee0e03f8eec',
+    'user1': 'scrypt:32768:8:1$HUBQdYyx2WvkuWGC$3240bcdb1c4b72c9f4df63e0f0630a150076e6b11379197bd4f1e295bfb71c2edc0353c06f9fa795671e499fb172adb34aa85b545ba284f7f5cccdb0de0ca907',
 }
 # This list defines who gets the 'admin' role upon successful login.
-ADMIN_USERS = ['admin', 'joellah']
+ADMIN_USERS = ['admin', 'Chindu', 'Joel', 'Dayal', 'Fahad']
 
 
 LOCK = threading.Lock()
