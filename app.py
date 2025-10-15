@@ -31,7 +31,7 @@ USERS = {
     'user1': 'scrypt:32768:8:1$HUBQdYyx2WvkuWGC$3240bcdb1c4b72c9f4df63e0f0630a150076e6b11379197bd4f1e295bfb71c2edc0353c06f9fa795671e499fb172adb34aa85b545ba284f7f5cccdb0de0ca907',
 }
 # This list defines who gets the 'admin' role upon successful login.
-ADMIN_USERS = ['admin', 'Chindu', 'Joel', 'Dayal', 'Fahad']
+ADMIN_USERS = ['admin', 'Chindu', 'Dayal']
 
 
 LOCK = threading.Lock()
@@ -249,7 +249,7 @@ def add():
         set_val('Part number', payload.get('Part number')); set_val('SKU ID', payload.get('SKU ID'))
         set_val('URLS', payload.get('URLS'))
         try:
-            units = int(float(payload.get('Existing Units', 0)))
+            units = str(float(payload.get('Existing Units', 0)))
             set_val('Existing Units', units)
             set_val('Remarks', 'Out of Stock' if units <= 0 else ('Low Stock' if units <= 5 else 'In Stock'))
         except ValueError:
@@ -329,7 +329,7 @@ def retrieve_item(item_no):
         wb_log = openpyxl.load_workbook(LOG_FILE)
         ws_log = wb_log.active
         log_entry = [
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
             username,
             item_no,
             target_row_obj[headers.index('Component')].value,
@@ -360,4 +360,4 @@ def download():
     return send_from_directory(directory=str(BASE_DIR), path=EXCEL_FILE.name, as_attachment=True)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=6969, debug=True)

@@ -1,6 +1,4 @@
-// ========================
 // --- GLOBAL CONSTANTS ---
-// ========================
 const headers = Array.from(document.querySelectorAll('#inv-table thead th')).map(th => th.dataset.headerName || th.innerText.trim());
 const unitsColIndex = headers.findIndex(h => h.toLowerCase().includes('existing units'));
 const remarksColIndex = headers.findIndex(h => h.toLowerCase().includes('remarks'));
@@ -8,16 +6,12 @@ const sectionColIndex = headers.findIndex(h => h.toLowerCase().includes('section
 const itemNoColIndex = headers.findIndex(h => h.toLowerCase().includes('item no'));
 const advancedHeaders = ['Part number', 'SKU ID', 'Remarks', 'URLS'];
 
-// ========================
 // --- GLOBAL VARIABLES ---
-// ========================
 let advancedVisible = false;
 let retrieveModal = null;
 let selectedItemNo = null;
 
-// =============================
 // --- ADMIN-ONLY FUNCTIONS ---
-// =============================
 function adjust(e, itemNo, delta) {
   e.preventDefault();
   const tr = document.querySelector(`tr[data-item-no="${itemNo}"]`);
@@ -79,9 +73,7 @@ function addItem(e) {
   return false;
 }
 
-// ========================
 // --- SHARED FUNCTIONS ---
-// ========================
 function resetSearch() {
   const searchInput = document.getElementById('search');
   if(searchInput) {
@@ -137,9 +129,7 @@ function applyAdvancedColumnsState() {
   document.querySelectorAll('.advanced-add-field').forEach(field => field.style.display = advancedVisible ? 'block' : 'none');
 }
 
-// ===============================
 // --- RETRIEVAL PAGE FUNCTIONS ---
-// ===============================
 function openRetrieveModal(itemNo) {
   selectedItemNo = itemNo;
   const tr = document.querySelector(`tr[data-item-no="${itemNo}"]`);
@@ -203,31 +193,8 @@ function confirmRetrieve() {
     });
 }
 
-// ===========================
-// --- PASSWORD TOGGLE ---
-// ===========================
-function showHiddenPass(loginPassId, loginEyeId){
-  const input = document.getElementById(loginPassId);
-  const iconEye = document.getElementById(loginEyeId);
-  if (!input || !iconEye) return;
-  iconEye.addEventListener('click', () =>{
-    if(input.type === 'password'){
-      input.type = 'text';
-      iconEye.classList.add('ri-eye-line');
-      iconEye.classList.remove('ri-eye-off-line');
-    } else{
-      input.type = 'password';
-      iconEye.classList.remove('ri-eye-line');
-      iconEye.classList.add('ri-eye-off-line');
-    }
-  });
-}
-
-// ===========================
-// --- INITIALIZATION ---
-// ===========================
+// --- MAIN INITIALIZATION LOGIC ---
 document.addEventListener('DOMContentLoaded', function() {
-    // Search filtering
     const searchInput = document.getElementById('search');
     if (searchInput) {
         searchInput.addEventListener('input', function() {
@@ -252,7 +219,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Section dropdown add new option
     const addSectionDropdown = document.getElementById('addSection');
     if (addSectionDropdown) {
         const addNewSectionOption = document.createElement('option');
@@ -275,13 +241,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         initializeAdvancedColumns();
     }
-
-    // Retrieve modal safety init
+    
+    // This part does not need a check as it's specific to retrieve.html, but having one is safe.
     const modalEl = document.getElementById('retrieveModal');
     if (modalEl) {
-        // could be used for bootstrap modal events if needed
+        // This line is important, but might not be strictly necessary if you re-init on every open.
+        // However, it's good practice.
     }
-
-    // Initialize password toggle if login page is present
-    showHiddenPass('login-pass','login-eye');
 });
