@@ -4,11 +4,16 @@
 body {
   padding-top: 1rem;
   padding-bottom: 2rem;
-  background-color: #f4f6f9;
+  /* background: url('login-bg.png'); */
+  background: url('centor_login_day.png');
+  height: 100vh;
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center;
   color: #343a40;
 }
 .ui-card {
-  background-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.3);
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   padding: 1.5rem;
@@ -16,8 +21,8 @@ body {
   border: 1px solid rgba(0,0,0,0.03);
 }
 .main-header {
-    background: white;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    background: rgba(0, 0, 0, 0.7); 
+    color: white;;
     margin-top: -1rem;
     /* padding-top: 1rem; */
     margin-bottom: 2rem !important;
@@ -39,13 +44,15 @@ body {
     z-index: 10;
 }
 .table > thead > tr > th {
-    background-color: #f8f9fa;
+    background-color: rgba(255, 255, 255, 0.75);
     border-bottom: 2px solid #dde2e6;
     font-weight: 600;
     text-transform: uppercase;
     font-size: 0.85rem;
+    font-style: italic;
+    font-display: auto;
     letter-spacing: 0.5px;
-    color: #495057;
+    color: rgba(0, 0, 0, 1);
 }
 .table-hover tbody tr {
     transition: background-color 0.2s ease;
@@ -75,7 +82,7 @@ body {
     border-radius: 6px;
     font-weight: 500;
     transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 .btn:hover {
     transform: translateY(-2px);
@@ -129,7 +136,7 @@ body {
   transition: all 0.3s ease;
 }
 
-/* --- Animations (Unchanged) --- */
+/* --- Animations --- */
 @keyframes pageFade {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -147,4 +154,97 @@ body {
 .add-form.submitting {
     opacity: 0.7;
     pointer-events: none;
+}
+
+/* --- Offcanvas Navigation --- */
+.offcanvas-nav {
+  height: 100%;
+  width: 0; /* starts hidden */
+  position: fixed;
+  z-index: 1050; /* above content */
+  top: 0;
+  left: 0;
+  background-color: rgba(0,0,0,0.9);
+  overflow-x: hidden;
+  transition: 0.4s;
+  padding-top: 60px;
+}
+
+.offcanvas-nav a {
+  padding: 8px 32px;
+  text-decoration: none;
+  font-size: 1.1rem;
+  color: #f1f1f1;
+  display: block;
+  transition: 0.3s;
+}
+
+.offcanvas-nav a:hover {
+  background-color: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+.offcanvas-nav .closebtn {
+  position: absolute;
+  top: 15px;
+  right: 25px;
+  font-size: 2rem;
+  color: #f1f1f1;
+}
+
+
+/* --- Pushing Sidebar --- */
+.push-sidebar {
+  height: calc(100% - 72px); /* subtract header height */
+  top: 72px;                 /* position below header */
+  left: 0;
+  width: 0;
+  position: fixed;
+  z-index: 1000;
+  background-color: #111;
+  overflow-x: hidden;
+  transition: 0.4s;
+  padding-top: 20px;
+}
+
+.push-sidebar a {
+  padding: 8px 32px;
+  text-decoration: none;
+  font-size: 1.1rem;
+  color: #f1f1f1;
+  display: block;
+  transition: 0.3s;
+}
+
+.push-sidebar a:hover {
+  background-color: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+.push-sidebar .closebtn {
+  position: absolute;
+  top: 5px;
+  right: 15px;
+  font-size: 2rem;
+  color: #f1f1f1;
+}
+
+/* --- Main content shifts --- */
+#mainContent {
+  transition: margin-left 0.4s;
+  padding: 20px;
+}
+
+/* --- Hamburger Icon --- */
+.menu-icon {
+  font-size: 30px;
+  cursor: pointer;
+  position: fixed;
+  top: 15px;
+  left: 20px;
+  z-index: 1100;
+  color: #ffffff;
+}
+.menu-icon:hover {
+  color: #b33838;
 }

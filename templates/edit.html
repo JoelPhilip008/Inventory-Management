@@ -1,0 +1,87 @@
+<!-- templates/edit.html -->
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ 'Edit Item' if item_data else 'Add New Item' }} - Inventory</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <!-- Header -->
+  <header class="main-header py-3 border-bottom container-fluid">
+    <div class="d-flex flex-wrap justify-content-between align-items-center container">
+      <a href="/" class="d-flex align-items-center text-dark text-decoration-none">
+        <span class="fs-4 fw-bold" style="padding-left: 40px; color: whitesmoke;">Inventory System</span>
+      </a>
+      <ul class="nav nav-pills align-items-center">
+        {% if session.role == 'admin' %}
+        <li class="nav-item"><a href="{{ url_for('view_logs') }}" class="nav-link">View Logs</a></li>
+        {% endif %}
+        <li class="nav-item"><span class="nav-link fw-medium" style="color: azure;">Hello, {{ session.username }}!</span></li>
+        <li class="nav-item ms-2"><a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Logout</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="container-fluid px-4">
+    <div class="ui-card add-form mt-4">
+      <h4 class="mb-3 text-primary border-bottom pb-2">
+        {{ 'Edit Item' if item_data else 'Add New Component' }}
+      </h4>
+      
+      <!-- The form's action is dynamic: it points to /edit_item/<id> or /add -->
+      <form id="editOrAddForm" method="post" action="{{ url_for('update_item', item_no=item_data['Item No']) if item_data else url_for('add_item') }}">
+        <div class="row g-3">
+          <!-- Dynamically populate fields if in Edit Mode -->
+          <div class="col-md-6 col-lg-3">
+            <label class="form-label text-muted small fw-bold">Section</label>
+            <select name="Section" class="form-select" required>
+              <option value="">Select Section...</option>
+              {% for section in all_sections %}
+                <option value="{{ section }}" {{ 'selected' if item_data and item_data.Section == section }}>{{ section }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <label class="form-label text-muted small fw-bold">Component Name</label>
+            <input name="Component" class="form-control" value="{{ item_data.Component if item_data }}" required />
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <label class="form-label text-muted small fw-bold">Stock</label>
+            <input name="Existing Units" class="form-control" value="{{ item_data['Existing Units'] if item_data else '0' }}" type="number" min="0" required />
+          </div>
+          <div class="col-md-6 col-lg-3">
+             <label class="form-label text-muted small fw-bold">Box Location</label>
+            <input name="Box No" class="form-control" value="{{ item_data['Box No'] if item_data }}" />
+          </div>
+          <div class="col-12">
+            <label class="form-label text-muted small fw-bold">Specifications</label>
+            <input name="Specifications" class="form-control" value="{{ item_data.Specifications if item_data }}" />
+          </div>
+          <div class="col-md-4">
+             <label class="form-label text-muted small fw-bold">Part Number</label>
+             <input name="Part number" class="form-control" value="{{ item_data['Part number'] if item_data }}" />
+          </div>
+          <div class="col-md-4">
+             <label class="form-label text-muted small fw-bold">SKU ID</label>
+             <input name="SKU ID" class="form-control" value="{{ item_data['SKU ID'] if item_data }}" />
+          </div>
+          <div class="col-md-4">
+             <label class="form-label text-muted small fw-bold">URL</label>
+             <input name="URLS" class="form-control" value="{{ item_data.URLS if item_data }}" />
+          </div>
+        </div>
+        <div class="mt-4 d-flex justify-content-between">
+          <a href="{{ url_for('index') }}" class="btn btn-lg btn-outline-secondary">Cancel</a>
+          <button class="btn btn-lg btn-primary px-5 fw-bold" type="submit">
+            {{ 'Save Changes' if item_data else 'Add to Inventory' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

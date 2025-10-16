@@ -1,3 +1,5 @@
+<!-- templates/index.html -->
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -5,75 +7,72 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Inventory Management</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Custom CSS -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
-  <!-- Main Header -->
+  <span class="menu-icon" onclick="toggleSectionNav()">&#9776;</span>
+
+  <div id="sectionOffcanvas" class="push-sidebar" style="background: rgba(0, 0, 0, 0.7)">
+  <!-- <a href="javascript:void(0)" class="closebtn" onclick="closeSectionNav()">&times;</a> -->
+  <!-- Add closeSectionNav() to each link's onclick -->
+  <a href="javascript:void(0)" onclick="filterBySection(''); closeSectionNav();">All Sections</a>
+  {% for section in all_sections %}
+    <a href="javascript:void(0)" onclick="filterBySection('{{ section }}'); closeSectionNav();">{{ section }}</a>
+  {% endfor %}
+</div>
+
   <header class="main-header py-3 border-bottom container-fluid">
-      <div class="d-flex flex-wrap justify-content-between align-items-center container">
-          <a href="/" class="d-flex align-items-center text-dark text-decoration-none">
-            <span class="fs-4 fw-bold text-primary">Inventory System</span>
-          </a>
-          <ul class="nav nav-pills align-items-center">
-            {% if session.role == 'admin' %}
-            <li class="nav-item"><a href="{{ url_for('view_logs') }}" class="nav-link">View Logs</a></li>
-            {% endif %}
-            <li class="nav-item"><span class="nav-link text-secondary fw-medium">Hello, {{ session.username }}! :D</span></li>
-            <li class="nav-item ms-2"><a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Logout</a></li>
-          </ul>
-      </div>
+    <div class="d-flex flex-wrap justify-content-between align-items-center container">
+      <a href="/" class="d-flex align-items-center text-dark text-decoration-none">
+        <span class="fs-4 fw-bold" style="padding-left: 40px; color: whitesmoke;">Inventory System</span>
+      </a>
+      <ul class="nav nav-pills align-items-center">
+        {% if session.role == 'admin' %}
+        <li class="nav-item"><a href="{{ url_for('view_logs') }}" class="nav-link">View Logs</a></li>
+        {% endif %}
+        <li class="nav-item"><span class="nav-link fw-medium" style="color: azure;">Hello, {{ session.username }}!</span></li>
+        <li class="nav-item ms-2"><a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Logout</a></li>
+      </ul>
+    </div>
   </header>
 
-  <div class="container-fluid px-4">
-    
-    <!-- Controls Card -->
-    <div class="ui-card">
+  <div id="mainContent">
+
+    <div class="container-fluid px-4">
+      <div class="ui-card">
         <div class="controls d-flex flex-wrap align-items-center gap-3">
           <div class="flex-grow-1">
               <input id="search" class="form-control form-control-lg" type="text" placeholder="Search components, specs, SKU..." />
           </div>
-          <select id="sectionFilter" class="form-select form-select-lg" style="width: auto; min-width: 200px;" onchange="filterBySection(this.value)">
-            <option value="">All Sections</option>
-            {% for section in all_sections %}
-              <option value="{{ section }}">{{ section }}</option>
-            {% endfor %}
-          </select>
-          
-          <div class="vr mx-2 d-none d-md-block"></div> <!-- Vertical Divider -->
-
-          <a href="/retrieve" class="btn btn-success btn-lg fw-bold text-white" style="min-width: 140px;">Retrieve</a>
-          
-          
+          <div class="vr mx-2 d-none d-md-block"></div>
+          <a href="{{ url_for('transaction_page') }}" class="btn btn-success btn-lg fw-bold text-white" style="min-width: 140px;">Retrieve / Return</a>
           <button id="advancedToggleBtn" class="btn btn-secondary" onclick="toggleAdvancedColumns()">Show Advanced</button>
-         {% if session.role == 'admin' %}
-          <a href="/download" class="btn btn-primary ms-auto d-flex align-items-center gap-2">
-             Download Backup
-          </a>
-           {% endif %}
+          {% if session.role == 'admin' %}
+          <a href="{{ url_for('edit_page') }}" class="btn btn-primary btn-lg fw-bold">Add New Item</a>
+          <a href="/download" class="btn ms-auto d-flex gap-2" style="background-color: rgba(255, 255, 255, 0.3);">Download Backup</a>
+          {% endif %}
         </div>
-    </div>
+      </div>
 
-    <!-- Table Card -->
-    <div class="ui-card p-0 overflow-hidden"> <!-- p-0 so table goes to edge -->
+      <div class="ui-card p-0 overflow-hidden">
         <div class="table-responsive">
           <table id="inv-table" class="table table-striped table-hover mb-0">
             <thead class="table-light">
               <tr id="table-headers">
                 {% for h in headers %}
-                  <th class="{{ 'advanced-column' if h in ['Part number', 'SKU ID', 'Remarks', 'URLS'] else '' }} {{ 'url-column' if h == 'URLS' else '' }}" data-header-name="{{ h }}">{{ h }}</th>
+                  <th class="{{ 'advanced-column' if h in ['Part number', 'SKU ID', 'Remarks', 'URLS'] else '' }}" data-header-name="{{ h }}">{{ h }}</th>
                 {% endfor %}
                 {% if session.role == 'admin' %}
-                <th>Actions</th>
-             </tr>
-             {% endif %}
+                <th data-header-name="Actions">Actions</th>
+                {% endif %}
+              </tr>
             </thead>
             <tbody id="table-body" class="table-group-divider">
               {% for row in data %}
                 <tr data-item-no="{{ row[0] }}">
                   {% for cell_value in row %}
-                    <td class="{{ 'advanced-column' if headers[loop.index0] in ['Part number', 'SKU ID', 'Remarks', 'URLS'] else '' }} {{ 'url-column' if headers[loop.index0] == 'URLS' else '' }}" data-col-name="{{ headers[loop.index0] }}">
+                    <td class="{{ 'advanced-column' if headers[loop.index0] in ['Part number', 'SKU ID', 'Remarks', 'URLS'] else '' }}" data-col-name="{{ headers[loop.index0] }}">
                       {% if headers[loop.index0] == 'URLS' and cell_value %}
                         <a href="{{ cell_value }}" target="_blank" class="text-decoration-none fw-bold">Link &nearr;</a>
                       {% else %}
@@ -81,79 +80,28 @@
                       {% endif %}
                     </td>
                   {% endfor %}
+                  {% if session.role == 'admin' %}
                   <td>
-                    {% if session.role == 'admin' %}
                     <div class="d-flex gap-1">
+                      <a href="{{ url_for('edit_page', item_no=row[0]) }}" class="btn btn-sm btn-outline-primary fw-bold" title="Edit">Edit</a>
                       <a href="#" onclick="adjust(event, {{ row[0] }}, 1)" class="btn btn-sm btn-outline-success fw-bold" title="Add 1">+1</a>
                       <a href="#" onclick="adjust(event, {{ row[0] }}, -1)" class="btn btn-sm btn-outline-warning fw-bold text-dark" title="Remove 1">-1</a>
                       <a href="#" onclick="deleteItem(event, {{ row[0] }})" class="btn btn-sm btn-outline-danger ms-1" title="Delete Item">&times;</a>
                     </div>
-                    
-                    
-                    {% endif %}
                   </td>
+                  {% endif %}
                 </tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
-    </div>
-
-    <!-- Add Item Form Card (Admin Only) -->
-    {% if session.role == 'admin' %}
-    <div class="ui-card add-form mt-4">
-      <h4 class="mb-3 text-primary border-bottom pb-2">Add New Component</h4>
-      <form id="addForm" method="post" action="/add" onsubmit="return addItem(event)">
-        <div class="row g-3">
-          <div class="col-md-6 col-lg-3">
-            <label class="form-label text-muted small fw-bold">Section</label>
-            <select name="Section" id="addSection" class="form-select" required>
-              <option value="">Select Section...</option>
-              {% for section in all_sections %}
-                <option value="{{ section }}">{{ section }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-md-6 col-lg-3">
-            <label class="form-label text-muted small fw-bold">Component Name</label>
-            <input name="Component" class="form-control" placeholder="e.g. Resistor" required />
-          </div>
-          <div class="col-md-6 col-lg-3">
-            <label class="form-label text-muted small fw-bold">Initial Stock</label>
-            <input name="Existing Units" class="form-control" value="0" min="0" required />
-          </div>
-          <div class="col-md-6 col-lg-3">
-             <label class="form-label text-muted small fw-bold">Box Location</label>
-            <input name="Box No" class="form-control" placeholder="e.g. A-12" />
-          </div>
-          <div class="col-12">
-            <label class="form-label text-muted small fw-bold">Specifications</label>
-            <input name="Specifications" class="form-control" placeholder="Full details, values, etc." />
-          </div>
-          <div class="col-md-4">
-            <label class="form-label text-muted small fw-bold">Part Number</label>
-            <input name="Part Number" class="form-control" />
-          </div>
-          <div class="col-md-4 ">
-             <label class="form-label text-muted small fw-bold">SKU ID</label>
-             <input name="SKU ID" class="form-control" />
-          </div>
-          <div class="col-md-4 ">
-             <label class="form-label text-muted small fw-bold">URL/Datasheet</label>
-             <input name="URLS" class="form-control" placeholder="http://..." />
-          </div>
-        </div>
-        <div class="mt-4 text-end">
-          <button class="btn btn-lg btn-primary px-5 fw-bold" type="submit">Add to Inventory</button>
-        </div>
-      </form>
-    </div>
-    {% endif %}
-  </div>
+      </div>
+    </div> 
+  </div> 
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
 
-
+<!-- end of file -->

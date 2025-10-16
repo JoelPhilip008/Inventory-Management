@@ -1,3 +1,4 @@
+/* login.css */
 @import url('https://fonts.googleapis.com/css?family=Montserrat:400,500,600,700|Poppins:400,500&display=swap');
 *{
   margin: 0;
@@ -6,7 +7,8 @@
   user-select: none;
 }
 .bg-img{
-  background: url('login-bg.png');
+  /* background: url('login-bg.png'); */
+  background: url('centor_login_day.png');
   height: 100vh;
   background-size: cover;
   background-position: center;
@@ -22,14 +24,15 @@
 }
 .content{
   position: absolute;
-  top: 50%;
+  top: 35%;
   left: 50%;
   z-index: 999;
   text-align: center;
+  border-radius: 500px;
   padding: 60px 32px;
   width: 370px;
   transform: translate(-50%,-50%);
-  background: rgba(255,255,255,0.04);
+  background: rgba(255,255,255,0.08);
   box-shadow: -1px 4px 28px 0px rgba(0,0,0,0.75);
 }
 .content header{
@@ -41,6 +44,7 @@
 }
 .field{
   position: relative;
+  border-radius: 50px;
   height: 45px;
   width: 100%;
   display: flex;
@@ -59,6 +63,7 @@
 .field input{
   height: 100%;
   width: 100%;
+  /* border-radius: 50px; */
   background: transparent;
   border: none;
   outline: none;
@@ -95,24 +100,24 @@
   text-decoration: underline;
 }
 .field input[type="submit"]{
-  background: #8a2424;
-  border: 1px solid #8a2424;
+  background: #e74708;
+  border: 1px solid #fff;
   color: white;
   font-size: 18px;
-  border-radius: 20px; /* Slightly less rounded to match inputs */
+  border-radius: 50px; /* Slightly less rounded to match inputs */
   letter-spacing: 1px;
   font-weight: 600;
   cursor: pointer;
   font-family: 'Montserrat',sans-serif;
-  width: 100%; /* Make the button fill the container width */
+  width: 50%; /* Make the button fill the container width */
   height: 50px; /* Give it a specific height */
   padding: 0; /* Remove the old padding */
-  margin: 0; /* Remove the old margin */
+  margin-left: 75px; /* Remove the old margin */
 }
 
 .field input[type="submit"]:hover{
-  background: #8a8a8a;
-  border: 1px solid #8a8a8a;
+  background: #8a2424;
+  
 }
 .login{
   color: white;

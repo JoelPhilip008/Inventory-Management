@@ -1,23 +1,22 @@
-// ========================
-// --- GLOBAL CONSTANTS ---
-// ========================
+// js/script.js
+
+// --- ======================================================= ---
+// ---                 GLOBAL CONSTANTS & VARS                 ---
+// --- ======================================================= ---
 const headers = Array.from(document.querySelectorAll('#inv-table thead th')).map(th => th.dataset.headerName || th.innerText.trim());
 const unitsColIndex = headers.findIndex(h => h.toLowerCase().includes('existing units'));
 const remarksColIndex = headers.findIndex(h => h.toLowerCase().includes('remarks'));
 const sectionColIndex = headers.findIndex(h => h.toLowerCase().includes('section'));
 const itemNoColIndex = headers.findIndex(h => h.toLowerCase().includes('item no'));
-const advancedHeaders = ['Part number', 'SKU ID', 'Remarks', 'URLS'];
 
-// ========================
-// --- GLOBAL VARIABLES ---
-// ========================
 let advancedVisible = false;
-let retrieveModal = null;
 let selectedItemNo = null;
+let transactionType = null;
 
-// =============================
-// --- ADMIN-ONLY FUNCTIONS ---
-// =============================
+// --- ======================================================= ---
+// ---            ADMIN-ONLY FUNCTIONS (index.html)            ---
+// --- ======================================================= ---
+
 function adjust(e, itemNo, delta) {
   e.preventDefault();
   const tr = document.querySelector(`tr[data-item-no="${itemNo}"]`);
@@ -30,7 +29,7 @@ function adjust(e, itemNo, delta) {
   fetch('/update', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({item_no: itemNo, col_name: headers[unitsColIndex], new_value: next})
+    body: JSON.stringify({item_no: itemNo, col_name: 'Existing Units', new_value: next})
   }).then(r => r.json()).then(j => {
     if (j.ok) {
       unitsCell.innerText = next;
@@ -57,7 +56,7 @@ function deleteItem(e, itemNo) {
     if (j.ok) {
       const tr = document.querySelector(`tr[data-item-no="${itemNo}"]`);
       if (tr) {
-        tr.classList.add('row-update-decrease');
+        tr.style.opacity = 0;
         setTimeout(() => location.reload(), 500);
       } else {
         location.reload();
@@ -68,20 +67,122 @@ function deleteItem(e, itemNo) {
   }).catch(err => alert('Error: ' + err));
 }
 
-function addItem(e) {
-  e.preventDefault();
-  const form = document.getElementById('addForm');
-  const container = form.closest('.add-form');
-  if(container) container.classList.add('submitting');
-  fetch('/add', { method:'POST', body: new FormData(form) }).then(() => {
-    location.reload();
-  });
-  return false;
+// --- ======================================================= ---
+// ---       TRANSACTION FUNCTIONS (transaction.html)        ---
+// --- ======================================================= ---
+
+function openTransactionModal(type, itemNo) {
+  selectedItemNo = itemNo;
+  transactionType = type;
+  
+  const tr = document.querySelector(`tr[data-item-no="${itemNo}"]`);
+  if (!tr) return;
+
+  // Since transaction.html has a fixed header, we can rely on indices.
+  const componentName = tr.cells[2].innerText;
+  const currentStock = parseInt(tr.cells[5].innerText, 10);
+  
+  const modalEl = document.getElementById("transactionModal");
+  if (!modalEl) return;
+  
+  // Get all the elements inside the modal we need to update
+  const title = modalEl.querySelector('.modal-title');
+  const quantityLabel = modalEl.querySelector('#modalQuantityLabel');
+  const confirmButton = modalEl.querySelector('#confirmButton');
+  const header = modalEl.querySelector('.modal-header');
+  const quantityInput = document.getElementById("transactionQuantity");
+  const modalInfo = document.getElementById('modalItemInfo');
+
+  modalInfo.innerHTML = `
+    <strong>Item:</strong> ${componentName}<br>
+    <strong>Current Stock:</strong> <span class="fw-bold fs-5 text-dark">${currentStock}</span>
+  `;
+  
+  quantityInput.value = 1;
+
+  if (type === 'retrieve') {
+    title.innerText = 'Retrieve Item';
+    if(quantityLabel) quantityLabel.innerText = 'Quantity to Retrieve:';
+    confirmButton.className = 'btn btn-success fw-bold';
+    confirmButton.innerText = 'Confirm Retrieval';
+    header.className = 'modal-header bg-success text-white';
+    quantityInput.max = currentStock;
+  } else { // type === 'return'
+    title.innerText = 'Return Item';
+    if(quantityLabel) quantityLabel.innerText = 'Quantity to Return:';
+    confirmButton.className = 'btn btn-info fw-bold text-white';
+    confirmButton.innerText = 'Confirm Return';
+    header.className = 'modal-header bg-info text-white';
+    quantityInput.removeAttribute('max');
+  }
+  
+  // ✅ THIS IS THE FIX: Create and show the modal instance here.
+  const modal = new bootstrap.Modal(modalEl);
+  modal.show();
 }
 
-// ========================
-// --- SHARED FUNCTIONS ---
-// ========================
+function changeQuantity(delta) {
+  const input = document.getElementById("transactionQuantity");
+  if (!input) return;
+  let value = parseInt(input.value) || 0;
+  let newValue = Math.max(1, value + delta);
+  
+  if (transactionType === 'retrieve') {
+    let max = parseInt(input.max) || Infinity;
+    if(newValue > max) newValue = max;
+  }
+  
+  input.value = newValue;
+}
+
+function confirmTransaction() {
+  const quantityInput = document.getElementById("transactionQuantity");
+  if (!selectedItemNo || !quantityInput || !transactionType) return;
+
+  const quantity = parseInt(quantityInput.value);
+  if (isNaN(quantity) || quantity <= 0) {
+    alert("Please enter a valid quantity.");
+    return;
+  }
+  
+  if (transactionType === 'retrieve' && quantity > parseInt(quantityInput.max)) {
+    alert("Cannot retrieve more than the available stock.");
+    return;
+  }
+
+  const endpoint = transactionType === 'retrieve' ? `/retrieve/${selectedItemNo}` : `/return_item/${selectedItemNo}`;
+  const confirmButton = document.getElementById('confirmButton');
+  confirmButton.disabled = true;
+  confirmButton.innerText = 'Processing...';
+
+  fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ quantity: quantity }),
+  })
+    .then(response => response.json())
+    .then(data => {
+      alert(data.message || data.error);
+      if (data.success) {
+        location.reload();
+      } else {
+        confirmButton.disabled = false;
+        confirmButton.innerText = transactionType === 'retrieve' ? 'Confirm Retrieval' : 'Confirm Return';
+      }
+    })
+    .catch(err => {
+      console.error("Transaction error:", err);
+      alert("An error occurred during the transaction.");
+      confirmButton.disabled = false;
+      confirmButton.innerText = transactionType === 'retrieve' ? 'Confirm Retrieval' : 'Confirm Return';
+    });
+}
+
+
+// --- ======================================================= ---
+// ---        SHARED FUNCTIONS & INITIALIZATION                ---
+// --- ======================================================= ---
+
 function resetSearch() {
   const searchInput = document.getElementById('search');
   if(searchInput) {
@@ -91,7 +192,12 @@ function resetSearch() {
 }
 
 function filterBySection(selectedSection) {
-  document.getElementById('search').dispatchEvent(new Event('input'));
+  const searchInput = document.getElementById('search');
+  if(searchInput) {
+      searchInput.dataset.selectedSection = selectedSection;
+      searchInput.dispatchEvent(new Event('input'));
+  }
+
   const allHeaderCells = document.querySelectorAll('#table-headers th');
   const allDataCells = document.querySelectorAll('#table-body td');
   if (itemNoColIndex > -1 && sectionColIndex > -1) {
@@ -134,113 +240,25 @@ function toggleAdvancedColumns() {
 
 function applyAdvancedColumnsState() {
   document.querySelectorAll('.advanced-column').forEach(col => col.classList.toggle('advanced-visible', advancedVisible));
-  document.querySelectorAll('.advanced-add-field').forEach(field => field.style.display = advancedVisible ? 'block' : 'none');
-}
-
-// ===============================
-// --- RETRIEVAL PAGE FUNCTIONS ---
-// ===============================
-function openRetrieveModal(itemNo) {
-  selectedItemNo = itemNo;
-  const tr = document.querySelector(`tr[data-item-no="${itemNo}"]`);
-  if (!tr) return;
-  const componentName = tr.cells[2].innerText;
-  const currentStock = parseInt(tr.cells[5].innerText);
-  const modalInfo = document.getElementById('modalItemInfo');
-  if (modalInfo) {
-      modalInfo.innerHTML = `<strong>Item:</strong> ${componentName}<br><strong>Available Stock:</strong> <span class="fw-bold fs-5 text-success">${currentStock}</span>`;
+  const addForm = document.getElementById('addForm');
+  if(addForm) {
+      addForm.querySelectorAll('.advanced-add-field').forEach(field => field.style.display = advancedVisible ? 'block' : 'none');
   }
-  const quantityInput = document.getElementById("retrieveQuantity");
-  quantityInput.max = currentStock;
-  quantityInput.value = 1;
-  const modal = new bootstrap.Modal(document.getElementById("retrieveModal"));
-  modal.show();
 }
 
-function changeQuantity(delta) {
-  const input = document.getElementById("retrieveQuantity");
-  if (!input) return;
-  let value = parseInt(input.value) || 0;
-  let max = parseInt(input.max) || Infinity;
-  let newValue = Math.max(1, value + delta);
-  if (newValue > max) { newValue = max; }
-  input.value = newValue;
-}
-
-function confirmRetrieve() {
-  const quantityInput = document.getElementById("retrieveQuantity");
-  if (!selectedItemNo || !quantityInput) return;
-  const quantity = parseInt(quantityInput.value);
-  if (isNaN(quantity) || quantity <= 0) {
-    alert("Please enter a valid quantity.");
-    return;
-  }
-  if (quantity > parseInt(quantityInput.max)) {
-      alert("Cannot retrieve more than the available stock.");
-      return;
-  }
-  const confirmButton = document.querySelector('#retrieveModal .btn-success');
-  confirmButton.disabled = true;
-  confirmButton.innerText = 'Processing...';
-  fetch(`/retrieve/${selectedItemNo}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ quantity: quantity }),
-  }).then(response => response.json()).then(data => {
-      if (data.success) {
-        alert("Item retrieved successfully!");
-        location.reload();
-      } else {
-        alert(data.error || "Error retrieving item.");
-        confirmButton.disabled = false;
-        confirmButton.innerText = 'Confirm';
-      }
-    }).catch(err => {
-      console.error("Retrieve error:", err);
-      alert("An error occurred while retrieving the item.");
-      confirmButton.disabled = false;
-      confirmButton.innerText = 'Confirm';
-    });
-}
-
-// ===========================
-// --- PASSWORD TOGGLE ---
-// ===========================
-function showHiddenPass(loginPassId, loginEyeId){
-  const input = document.getElementById(loginPassId);
-  const iconEye = document.getElementById(loginEyeId);
-  if (!input || !iconEye) return;
-  iconEye.addEventListener('click', () =>{
-    if(input.type === 'password'){
-      input.type = 'text';
-      iconEye.classList.add('ri-eye-line');
-      iconEye.classList.remove('ri-eye-off-line');
-    } else{
-      input.type = 'password';
-      iconEye.classList.remove('ri-eye-line');
-      iconEye.classList.add('ri-eye-off-line');
-    }
-  });
-}
-
-// ===========================
-// --- INITIALIZATION ---
-// ===========================
 document.addEventListener('DOMContentLoaded', function() {
-    // Search filtering
     const searchInput = document.getElementById('search');
     if (searchInput) {
         searchInput.addEventListener('input', function() {
             const q = this.value.trim().toLowerCase();
+            const selectedSection = this.dataset.selectedSection || '';
             const rows = document.querySelectorAll('#table-body tr');
-            const sectionFilterEl = document.getElementById('sectionFilter');
-            const sectionFilterValue = sectionFilterEl ? sectionFilterEl.value : '';
             rows.forEach(r => {
                 const text = r.innerText.toLowerCase();
-                const rowSectionCell = (sectionColIndex > -1 && sectionFilterValue && r.cells[sectionColIndex]) ? r.cells[sectionColIndex] : null;
-                const rowSection = rowSectionCell ? rowSectionCell.innerText.trim() : '';
+                const rowSectionCell = (sectionColIndex > -1 && r.cells[sectionColIndex]) ? r.cells[sectionColIndex] : null;
+                const rowSectionText = rowSectionCell ? rowSectionCell.innerText.trim().toLowerCase() : '';
                 const matchesSearch = (!q || text.includes(q));
-                const matchesSectionFilter = (!sectionFilterValue || rowSection.toLowerCase() === sectionFilterValue.toLowerCase());
+                const matchesSectionFilter = (!selectedSection || rowSectionText === selectedSection.toLowerCase());
                 if (matchesSearch && matchesSectionFilter) {
                     r.style.display = '';
                     setTimeout(() => r.style.opacity = 1, 10);
@@ -252,36 +270,52 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Section dropdown add new option
     const addSectionDropdown = document.getElementById('addSection');
     if (addSectionDropdown) {
-        const addNewSectionOption = document.createElement('option');
-        addNewSectionOption.value = '___NEW_SECTION___';
-        addNewSectionOption.innerText = 'Add New Section...';
-        addSectionDropdown.appendChild(addNewSectionOption);
-        addSectionDropdown.addEventListener('change', function() {
-            if (this.value === '___NEW_SECTION___') {
-                const newSectionName = prompt('Enter new section name:');
-                if (newSectionName && newSectionName.trim() !== '') {
-                    const sanitized = newSectionName.trim();
-                    const filterDropdown = document.getElementById('sectionFilter');
-                    if (filterDropdown) filterDropdown.appendChild(new Option(sanitized, sanitized));
-                    addSectionDropdown.insertBefore(new Option(sanitized, sanitized), addNewSectionOption);
-                    addSectionDropdown.value = sanitized;
-                } else {
-                    this.value = '';
-                }
-            }
-        });
         initializeAdvancedColumns();
     }
-
-    // Retrieve modal safety init
-    const modalEl = document.getElementById('retrieveModal');
-    if (modalEl) {
-        // could be used for bootstrap modal events if needed
-    }
-
-    // Initialize password toggle if login page is present
-    showHiddenPass('login-pass','login-eye');
 });
+
+// function openSectionNav() {
+//   const sidebar = document.getElementById("sectionOffcanvas");
+//   const main = document.getElementById("mainContent");
+//   if (sidebar) sidebar.style.width = "250px";
+//   if (main) main.style.marginLeft = "250px";
+// }
+
+// function closeSectionNav() {
+//   const sidebar = document.getElementById("sectionOffcanvas");
+//   const main = document.getElementById("mainContent");
+//   if (sidebar) sidebar.style.width = "0";
+//   if (main) main.style.marginLeft = "0";
+// }
+
+// --- SIDEBAR NAVIGATION (CORRECTED) ---
+function toggleSectionNav() {
+  const sidebar = document.getElementById("sectionOffcanvas");
+  const main = document.getElementById("mainContent");
+
+  if (sidebar && main) {
+    // Check if the sidebar is currently open
+    if (sidebar.style.width === "250px") {
+      // If it's open, close it
+      sidebar.style.width = "0";
+      main.style.marginLeft = "0";
+    } else {
+      // If it's closed, open it
+      sidebar.style.width = "250px";
+      main.style.marginLeft = "250px";
+    }
+  }
+}
+
+// We can keep a separate close function for the 'x' button and clicking on links
+function closeSectionNav() {
+  const sidebar = document.getElementById("sectionOffcanvas");
+  const main = document.getElementById("mainContent");
+  if (sidebar) sidebar.style.width = "0";
+  if (main) main.style.marginLeft = "0";
+}
+
+
+// end of file

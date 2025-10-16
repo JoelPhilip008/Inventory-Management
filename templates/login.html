@@ -1,10 +1,13 @@
 <!DOCTYPE html>
+
+<!-- login.html  -->
 <!-- Created By CodingNepal -->
 <html lang="en" dir="ltr">
    <head>
       <meta charset="utf-8">
       <title>Inventory - Login</title>
-      <link rel="stylesheet" href="static/css/login.css">
+      <!-- You should use the login.css from your static folder -->
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
    </head>
    <body>
@@ -12,10 +15,20 @@
     <div class="content">
       <header>Inventory</header>
 
-      <!-- ✅ Proper form action & method -->
       <form method="POST" action="{{ url_for('login') }}">
 
-        <!-- ✅ Username Field -->
+        {% if error %}
+          <div class="field" style="background: #f8d7da; border-radius: 5px; margin-bottom: 16px;">
+            <span style="color: #721c24; text-align: center; width: 100%; font-family: 'Poppins', sans-serif;">
+              {{ error }}
+            </span>
+          </div>
+        {% endif %}
+
+        <!-- {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %} -->
+
+
+        <!-- Username Field -->
         <div class="field">
           <span class="fa fa-user"></span>
           <input 
@@ -25,7 +38,7 @@
             placeholder="Name">
         </div>
 
-        <!-- ✅ Password Field -->
+        <!-- Password Field -->
         <div class="field space">
           <span class="fa fa-lock"></span>
           <input 
@@ -41,15 +54,14 @@
           <!-- <a href="#">Forgot Password?</a> -->
         </div>
         
-        <div class="field space submit-field"> <!-- Added "submit-field" class -->
+        <div class="field space submit-field">
          <input type="submit" value="LOGIN">
-      </div>
+        </div>
 
       </form>
     </div>
   </div>
 
-  <!-- Optional: password show/hide JS -->
   <script>
     const passField = document.querySelector(".pass-key");
     const showBtn = document.querySelector(".show");
@@ -58,13 +70,14 @@
         if (passField.type === "password") {
           passField.type = "text";
           showBtn.textContent = "HIDE";
+          showBtn.style.color = "#8a2424";
         } else {
           passField.type = "password";
           showBtn.textContent = "SHOW";
+          showBtn.style.color = "#222";
         }
       });
     }
   </script>
 </body>
-
 </html>
