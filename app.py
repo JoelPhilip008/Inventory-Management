@@ -29,7 +29,7 @@ USERS = {
     'user1': 'scrypt:32768:8:1$HUBQdYyx2WvkuWGC$3240bcdb1c4b72c9f4df63e0f0630a150076e6b11379197bd4f1e295bfb71c2edc0353c06f9fa795671e499fb172adb34aa85b545ba284f7f5cccdb0de0ca907',
 }
 # This list defines who gets the 'admin' role upon successful login.
-ADMIN_USERS = ['admin', 'Chindu', 'Dayal']
+ADMIN_USERS = ['admin', 'chindu', 'dayal']
 
 
 LOCK = threading.Lock()
