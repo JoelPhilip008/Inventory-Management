@@ -1,5 +1,3 @@
-<!-- templates/edit.html -->
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -10,7 +8,6 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-  <!-- Header -->
   <header class="main-header py-3 border-bottom container-fluid">
     <div class="d-flex flex-wrap justify-content-between align-items-center container">
       <a href="/" class="d-flex align-items-center text-dark text-decoration-none">
@@ -32,13 +29,11 @@
         {{ 'Edit Item' if item_data else 'Add New Component' }}
       </h4>
       
-      <!-- The form's action is dynamic: it points to /edit_item/<id> or /add -->
       <form id="editOrAddForm" method="post" action="{{ url_for('update_item', item_no=item_data['Item No']) if item_data else url_for('add_item') }}">
         <div class="row g-3">
-          <!-- Dynamically populate fields if in Edit Mode -->
           <div class="col-md-6 col-lg-3">
             <label class="form-label text-muted small fw-bold">Section</label>
-            <select name="Section" class="form-select" required>
+            <select name="Section" id="sectionSelect" class="form-select" required>
               <option value="">Select Section...</option>
               {% for section in all_sections %}
                 <option value="{{ section }}" {{ 'selected' if item_data and item_data.Section == section }}>{{ section }}</option>
@@ -47,31 +42,31 @@
           </div>
           <div class="col-md-6 col-lg-3">
             <label class="form-label text-muted small fw-bold">Component Name</label>
-            <input name="Component" class="form-control" value="{{ item_data.Component if item_data }}" required />
+            <input name="Component" class="form-control" value="{{ item_data.Component if item_data else '' }}" required />
           </div>
           <div class="col-md-6 col-lg-3">
             <label class="form-label text-muted small fw-bold">Stock</label>
-            <input name="Existing Units" class="form-control" value="{{ item_data['Existing Units'] if item_data else '0' }}" type="number" min="0" required />
+            <input name="Existing Units" class="form-control" value="{{ item_data['Existing Units'] if item_data else '0' }}" />
           </div>
           <div class="col-md-6 col-lg-3">
              <label class="form-label text-muted small fw-bold">Box Location</label>
-            <input name="Box No" class="form-control" value="{{ item_data['Box No'] if item_data }}" />
+            <input name="Box No" class="form-control" value="{{ item_data['Box No'] if item_data else '' }}" />
           </div>
           <div class="col-12">
             <label class="form-label text-muted small fw-bold">Specifications</label>
-            <input name="Specifications" class="form-control" value="{{ item_data.Specifications if item_data }}" />
+            <input name="Specifications" class="form-control" value="{{ item_data.Specifications if item_data else '' }}" />
           </div>
           <div class="col-md-4">
              <label class="form-label text-muted small fw-bold">Part Number</label>
-             <input name="Part number" class="form-control" value="{{ item_data['Part number'] if item_data }}" />
+             <input name="Part number" class="form-control" value="{{ item_data['Part number'] if item_data else '' }}" />
           </div>
           <div class="col-md-4">
              <label class="form-label text-muted small fw-bold">SKU ID</label>
-             <input name="SKU ID" class="form-control" value="{{ item_data['SKU ID'] if item_data }}" />
+             <input name="SKU ID" class="form-control" value="{{ item_data['SKU ID'] if item_data else '' }}" />
           </div>
           <div class="col-md-4">
              <label class="form-label text-muted small fw-bold">URL</label>
-             <input name="URLS" class="form-control" value="{{ item_data.URLS if item_data }}" />
+             <input name="URLS" class="form-control" value="{{ item_data.URLS if item_data else '' }}" />
           </div>
         </div>
         <div class="mt-4 d-flex justify-content-between">
@@ -83,5 +78,34 @@
       </form>
     </div>
   </div>
+
+  <script>
+    // --- THIS IS THE NEW SCRIPT BLOCK ---
+    document.addEventListener('DOMContentLoaded', function() {
+        const sectionDropdown = document.getElementById('sectionSelect');
+        if (sectionDropdown) {
+            // Create and append the "Add New Section" option
+            const addNewOption = new Option('+ Add New Section...', '___NEW_SECTION___');
+            sectionDropdown.appendChild(addNewOption);
+
+            // Add the event listener
+            sectionDropdown.addEventListener('change', function() {
+                if (this.value === '___NEW_SECTION___') {
+                    const newSectionName = prompt('Enter new section name:');
+                    if (newSectionName && newSectionName.trim() !== '') {
+                        const sanitizedName = newSectionName.trim();
+                        // Create the new option, add it before the "Add New" option, and select it
+                        const newOption = new Option(sanitizedName, sanitizedName);
+                        sectionDropdown.insertBefore(newOption, addNewOption);
+                        this.value = sanitizedName;
+                    } else {
+                        // If user cancels or enters nothing, reset to "Select Section"
+                        this.value = '';
+                    }
+                }
+            });
+        }
+    });
+  </script>
 </body>
 </html>

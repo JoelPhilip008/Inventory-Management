@@ -82,7 +82,7 @@ def ensure_log_file():
         ws = wb.active
         ws.title = 'Logs'
         # Corrected Headers
-        headers = ['Timestamp', 'Username', 'Transaction Type', 'Item No', 'Component', 'Quantity Changed', 'New Quantity']
+        headers = ['Timestamp', 'Username', 'Transaction Type', 'Item No', 'Component', 'Quantity Changed', 'New Quantity', 'Notes']
         ws.append(headers)
         wb.save(LOG_FILE)
 
@@ -390,14 +390,12 @@ def update_item(item_no):
         new_stock = int(target_row_obj[units_col_idx].value or 0)
         target_row_obj[remarks_col_idx].value = 'Out of Stock' if new_stock <= 0 else ('Low Stock' if new_stock <= 5 else 'In Stock')
         
-        # This is a complex operation: if the section was changed, we need to move the row
-        # For simplicity, we will first re-save and then handle re-indexing which also corrects the Section column
         wb.save(EXCEL_FILE)
         save_workbook_with_reindex(load_workbook()) # Re-run re-indexing
         
     return redirect(url_for('index'))
 
-def perform_transaction(item_no, quantity_change, transaction_type):
+def perform_transaction(item_no, quantity_change, transaction_type, notes=""):
     username = session.get('username')
     with LOCK:
         wb_inv = load_workbook()
@@ -425,6 +423,7 @@ def perform_transaction(item_no, quantity_change, transaction_type):
             return jsonify({'success': False, 'error': f'Not enough stock. Only {current_stock} available.'}), 400
 
         new_stock = current_stock + quantity_change # quantity_change will be negative for retrievals
+        box_no = target_row_obj[headers.index('Box No')].value
         target_row_obj[units_col_idx].value = new_stock
         target_row_obj[headers.index('Remarks')].value = 'Out of Stock' if new_stock <= 0 else ('Low Stock' if new_stock <= 5 else 'In Stock')
         wb_inv.save(EXCEL_FILE)
@@ -433,34 +432,49 @@ def perform_transaction(item_no, quantity_change, transaction_type):
         wb_log = openpyxl.load_workbook(LOG_FILE)
         ws_log = wb_log.active
         ws_log.append([
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S"), username, transaction_type, item_no,
+            datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
+            username,
+            transaction_type,
+            item_no,
             target_row_obj[headers.index('Component')].value,
-            f"{'+' if quantity_change > 0 else ''}{quantity_change}", new_stock
+            f"{'+' if quantity_change > 0 else ''}{quantity_change}",
+            new_stock,
+            notes  
         ])
         wb_log.save(LOG_FILE)
 
-    return jsonify({'success': True, 'message': f'Transaction successful.'})
+    return jsonify({'success': True, 'message': f'Transaction successful.\nYou may proceed to box number {box_no}.'})
 
 @app.route('/retrieve/<int:item_no>', methods=['POST'])
 @login_required
 def retrieve_item(item_no):
-    quantity = request.get_json().get('quantity')
+    payload = request.get_json()
+    quantity = payload.get('quantity')
+    notes = payload.get('notes', '') 
     if not quantity or quantity <= 0: return jsonify({'success': False, 'error': 'Invalid quantity.'}), 400
-    return perform_transaction(item_no, -quantity, "RETRIEVE")
+    return perform_transaction(item_no, -quantity, "RETRIEVE", notes)
 
 @app.route('/return_item/<int:item_no>', methods=['POST'])
 @login_required
 def return_item(item_no):
-    quantity = request.get_json().get('quantity')
+    payload = request.get_json()
+    quantity = payload.get('quantity')
+    notes = payload.get('notes', '') 
     if not quantity or quantity <= 0: return jsonify({'success': False, 'error': 'Invalid quantity.'}), 400
-    return perform_transaction(item_no, quantity, "RETURN")
+    return perform_transaction(item_no, quantity, "RETURN", notes)
 
 @app.route('/logs')
 @login_required
-@admin_required
 def view_logs():
     log_headers, log_data = load_logs()
-    log_data.reverse()
+    
+    if session.get('role') != 'admin':
+        current_user = session.get('username', '').lower()
+        user_logs = [row for row in log_data if row[1].lower() == current_user]
+        log_data = user_logs
+
+    log_data.reverse() 
+    
     return render_template('logs.html', headers=log_headers, data=log_data, session=session)
 
 @app.route('/download')
@@ -471,4 +485,5 @@ def download():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
+
 # --- END OF FILE ---

@@ -1,3 +1,5 @@
+<!-- templates/logs.html -->
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -67,6 +69,7 @@
                 <td>{{ row[4] }}</td> <!-- Component -->
                 <td>{{ row[5] }}</td> <!-- Quantity Changed -->
                 <td>{{ row[6] }}</td> <!-- New Quantity -->
+                <td>{{ row[7] }}</td> <!-- Notes -->
               </tr>
               {% endfor %}
             </tbody>
@@ -79,3 +82,5 @@
   <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
+
+<!-- end of file -->

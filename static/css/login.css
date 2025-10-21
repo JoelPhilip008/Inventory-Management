@@ -1,4 +1,5 @@
-/* login.css */
+/* static/css/login.css */
+
 @import url('https://fonts.googleapis.com/css?family=Montserrat:400,500,600,700|Poppins:400,500&display=swap');
 *{
   margin: 0;
@@ -153,3 +154,5 @@ i span{
 .signup a:hover{
   text-decoration: underline;
 }
+
+/* end of file */

@@ -1,3 +1,5 @@
+<!-- templates/transaction.html -->
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -93,6 +95,10 @@
                 <input type="number" id="transactionQuantity" value="1" min="1" class="form-control text-center fw-bold"/>
                 <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(1)">+</button>
             </div>
+            <div class="form-floating mt-3">
+                <input type="text" class="form-control" id="transactionNotes" placeholder="Notes (Optional)">
+                <label for="transactionNotes">Notes (Optional)</label>
+            </div>
         </div>
         <div class="modal-footer bg-light">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -106,3 +112,5 @@
   <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
+
+<!-- end of file -->

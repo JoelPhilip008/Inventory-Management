@@ -78,7 +78,6 @@ function openTransactionModal(type, itemNo) {
   const tr = document.querySelector(`tr[data-item-no="${itemNo}"]`);
   if (!tr) return;
 
-  // Since transaction.html has a fixed header, we can rely on indices.
   const componentName = tr.cells[2].innerText;
   const currentStock = parseInt(tr.cells[5].innerText, 10);
   
@@ -139,6 +138,7 @@ function confirmTransaction() {
   if (!selectedItemNo || !quantityInput || !transactionType) return;
 
   const quantity = parseInt(quantityInput.value);
+  const notes = document.getElementById('transactionNotes').value.trim(); 
   if (isNaN(quantity) || quantity <= 0) {
     alert("Please enter a valid quantity.");
     return;
@@ -157,7 +157,10 @@ function confirmTransaction() {
   fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ quantity: quantity }),
+    body: JSON.stringify({ 
+        quantity: quantity,
+        notes: notes
+    }),
   })
     .then(response => response.json())
     .then(data => {
