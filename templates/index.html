@@ -15,7 +15,6 @@
 
   <div id="sectionOffcanvas" class="push-sidebar" style="background: rgba(0, 0, 0, 0.7)">
   <!-- <a href="javascript:void(0)" class="closebtn" onclick="closeSectionNav()">&times;</a> -->
-  <!-- Add closeSectionNav() to each link's onclick -->
   <a href="javascript:void(0)" onclick="filterBySection(''); closeSectionNav();">All Sections</a>
   {% for section in all_sections %}
     <a href="javascript:void(0)" onclick="filterBySection('{{ section }}'); closeSectionNav();">{{ section }}</a>

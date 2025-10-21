@@ -116,7 +116,6 @@ function openTransactionModal(type, itemNo) {
     quantityInput.removeAttribute('max');
   }
   
-  // ✅ THIS IS THE FIX: Create and show the modal instance here.
   const modal = new bootstrap.Modal(modalEl);
   modal.show();
 }
@@ -290,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
 //   if (main) main.style.marginLeft = "0";
 // }
 
-// --- SIDEBAR NAVIGATION (CORRECTED) ---
+// --- SIDEBAR NAVIGATION ---
 function toggleSectionNav() {
   const sidebar = document.getElementById("sectionOffcanvas");
   const main = document.getElementById("mainContent");
@@ -309,7 +308,6 @@ function toggleSectionNav() {
   }
 }
 
-// We can keep a separate close function for the 'x' button and clicking on links
 function closeSectionNav() {
   const sidebar = document.getElementById("sectionOffcanvas");
   const main = document.getElementById("mainContent");

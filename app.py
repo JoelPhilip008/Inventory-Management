@@ -35,7 +35,7 @@ ADMIN_USERS = ['admin', 'chindu', 'dayal']
 LOCK = threading.Lock()
 BASE_DIR = Path(__file__).parent
 EXCEL_FILE = BASE_DIR / 'inventory.xlsx'
-LOG_FILE = BASE_DIR / 'transaction_logs.xlsx' # Renamed for clarity
+LOG_FILE = BASE_DIR / 'transaction_logs.xlsx' 
 
 # --- Decorators ---
 def login_required(f):
@@ -54,8 +54,7 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get('role') != 'admin':
-            # --- THIS IS THE CORRECTED LOGIC ---
-            # Check if the request expects a JSON response (like our fetch calls do)
+            # Check if the request expects a JSON response 
             if request.accept_mimetypes.accept_json and \
                not request.accept_mimetypes.accept_html:
                 return jsonify({'ok': False, 'error': 'Admin access required'}), 403 # Forbidden
@@ -471,5 +470,5 @@ def download():
     return send_from_directory(directory=str(BASE_DIR), path=EXCEL_FILE.name, as_attachment=True)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=6969, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
 # --- END OF FILE ---

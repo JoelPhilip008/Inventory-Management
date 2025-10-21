@@ -99,9 +99,9 @@ body {
     box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-/* --- ======================================================= --- */
-/* ---        NEW & REFACTORED ADVANCED COLUMN STYLES          --- */
-/* --- ======================================================= --- */
+/* --- =======================================--- */
+/* ---        ADVANCED COLUMN STYLES          --- */
+/* --- =======================================--- */
 
 /* By default, advanced columns are hidden */
 .advanced-column {
@@ -128,7 +128,7 @@ body {
 }
 
 
-/* --- Section Hiding (Unchanged) --- */
+/* --- Section Hiding --- */
 .section-filtered-column {
   width: 0 !important;
   min-width: 0 !important;
